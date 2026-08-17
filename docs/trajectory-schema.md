@@ -29,3 +29,14 @@ trajectiq-trace-regression \
 ```
 
 传入自己的 JSONL 评测集时，使用 `--dataset`。每行是一条任务，字段包括 `task_id`、`category`、`tags`、`input`、`expected_tools`、`expected_arguments`、`expected_answer_contains` 和可选的 `critical`。
+
+## Phoenix/OpenInference 导出
+
+原始 OpenTelemetry/Phoenix JSON 使用 `--input-format openinference`。适配器按照 OpenInference 语义约定读取：
+
+- `trajectiq.task_id`：关联版本化评测任务。
+- `openinference.span.kind=TOOL`：识别工具调用步骤。
+- `tool.name`、`input.value`、`output.value`：恢复工具名、参数与结果。
+- `error.type` 或 OTel `status_code=ERROR`：保留工具错误。
+
+导出可以是顶层 `spans` 数组，也可以是包含 `spans` 的 `traces` 数组；attributes 同时支持 Phoenix 的 JSON 对象和 OTLP JSON 属性数组。

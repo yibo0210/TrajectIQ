@@ -9,6 +9,7 @@ from typing import Any
 from .data import TASKS
 from .dataset import load_dataset
 from .models import Task
+from .openinference import load_openinference_export
 from .regression import RegressionReport, compare_results, render_markdown
 
 
@@ -71,10 +72,20 @@ def load_trace_collection(path: Path) -> TraceCollection:
     return TraceCollection(version=version, runs=normalized_runs)
 
 
-def compare_trace_collections(*, baseline_path: Path, candidate_path: Path, tasks: tuple[Task, ...] = TASKS, dataset_name: str = "customer_support_v1") -> RegressionReport:
+def load_trace_input(path: Path, *, input_format: str) -> TraceCollection:
+    """Load either the normalized TrajectIQ schema or an OpenInference export."""
+    if input_format == "trajectiq":
+        return load_trace_collection(path)
+    if input_format == "openinference":
+        version, runs = load_openinference_export(path)
+        return TraceCollection(version=version, runs=runs)
+    raise ValueError(f"Unsupported trace input format: {input_format}")
+
+
+def compare_trace_collections(*, baseline_path: Path, candidate_path: Path, tasks: tuple[Task, ...] = TASKS, dataset_name: str = "customer_support_v1", input_format: str = "trajectiq") -> RegressionReport:
     """Compare two external trajectory exports with TrajectIQ's core evaluator."""
-    baseline = load_trace_collection(baseline_path)
-    candidate = load_trace_collection(candidate_path)
+    baseline = load_trace_input(baseline_path, input_format=input_format)
+    candidate = load_trace_input(candidate_path, input_format=input_format)
     expected_task_ids = {task.task_id for task in tasks}
     for label, collection in (("baseline", baseline), ("candidate", candidate)):
         missing = expected_task_ids - collection.runs.keys()
@@ -97,6 +108,7 @@ def main() -> None:
     parser.add_argument("--dataset-name", default="customer_support_v1")
     parser.add_argument("--dataset", type=Path, help="Optional JSONL dataset using the TrajectIQ task schema.")
     parser.add_argument("--dataset-version", default="custom")
+    parser.add_argument("--input-format", choices=("trajectiq", "openinference"), default="trajectiq")
     parser.add_argument("--format", choices=("json", "markdown"), default="markdown")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -106,6 +118,7 @@ def main() -> None:
         candidate_path=args.candidate_traces,
         tasks=dataset.tasks if dataset else TASKS,
         dataset_name=dataset.identifier if dataset else args.dataset_name,
+        input_format=args.input_format,
     )
     rendered = json.dumps(report.to_dict(), ensure_ascii=False, indent=2) if args.format == "json" else render_markdown(report)
     if args.output:

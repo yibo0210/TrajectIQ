@@ -67,3 +67,11 @@ Acceptance: the regression fixture produces ten diagnosed refund regressions, wh
 - Publish Markdown gate reports as GitHub Actions summaries, artifacts, and updatable pull-request comments.
 
 Acceptance: an external baseline/candidate trace pair produces the same deterministic regression report as the built-in Agent fixture.
+
+### v0.9: OpenInference trace adapter (complete)
+
+- Adapt Phoenix/OpenTelemetry JSON span exports using OpenInference `TOOL`, `tool.name`, `input.value`, and `output.value` conventions.
+- Support both Phoenix-style attribute mappings and OTLP JSON attribute arrays.
+- Keep external traces on the same version comparison and category-slice path as the built-in fixture.
+
+Acceptance: a raw OpenInference baseline/candidate export reproduces all ten deterministic refund regressions without manual trace normalization.

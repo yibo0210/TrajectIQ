@@ -6,7 +6,7 @@ TrajectIQ 是一个面向多工具 Agent 的发布质量诊断平台。项目以
 
 ## 项目状态
 
-`v0.8` 已完成：确定性 Agent 运行时、外部轨迹接入、版本化 36 条评测集、回归诊断、YAML 门禁、PR 质量反馈和独立 Dashboard。
+`v0.9` 已完成：确定性 Agent 运行时、Phoenix/OpenInference Trace 适配、版本化 36 条评测集、回归诊断、YAML 门禁、PR 质量反馈和独立 Dashboard。
 
 ## 项目结构
 
@@ -85,6 +85,15 @@ trajectiq-trace-regression \
   --format markdown
 ```
 
+对于 Phoenix 或 OpenTelemetry 导出的原始 Span JSON，可直接启用 OpenInference 适配器，不需要自行转换工具调用：
+
+```bash
+trajectiq-trace-regression \
+  --baseline-traces exports/baseline-otel.json \
+  --candidate-traces exports/candidate-otel.json \
+  --input-format openinference
+```
+
 评测集以 JSONL 管理，每条任务包含类别、标签、关键任务标识、预期工具链、参数和回答断言。可通过 `--dataset` 传入自己的版本化数据集。完整格式见 [外部轨迹接入说明](docs/trajectory-schema.md)。
 
 ## CI 质量反馈
@@ -103,4 +112,4 @@ trajectiq --version baseline --trace --endpoint http://localhost:6006
 
 ## 项目边界
 
-Phoenix 负责 Trace 存储、界面、数据集和评测基础设施；TrajectIQ 独立实现轨迹适配、版本化评测集、回归比较、首错归因和发布门禁，因此可以作为完整的 Agent 质量工程个人项目运行与演示。
+Phoenix 负责 Trace 存储、界面、数据集和评测基础设施；TrajectIQ 独立实现 OpenInference 轨迹适配、版本化评测集、回归比较、首错归因和发布门禁，因此可以作为完整的 Agent 质量工程个人项目运行与演示。
