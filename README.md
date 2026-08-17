@@ -1,5 +1,4 @@
 # TrajectIQ
-
 TrajectIQ is a Phoenix extension project for diagnosing e-commerce support Agent regressions and enforcing release-quality gates. Phoenix remains the observability foundation; TrajectIQ adds version comparison, first-error localization, failure clustering, and CI release gates.
 
 ## Current status
