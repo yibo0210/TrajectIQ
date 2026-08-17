@@ -8,9 +8,15 @@ def test_regression_report_identifies_refund_tasks_that_degraded() -> None:
     )
 
     assert report.baseline.success_rate == 1.0
-    assert report.candidate.success_rate == 4 / 6
-    assert [item.task_id for item in report.regressions] == ["refund_001", "refund_002"]
-    assert all(item.is_critical is (item.task_id == "refund_001") for item in report.regressions)
+    assert report.candidate.success_rate == 26 / 36
+    assert [item.task_id for item in report.regressions] == [
+        f"refund_{index:03d}" for index in range(1, 11)
+    ]
+    assert [item.task_id for item in report.regressions if item.is_critical] == [
+        "refund_001",
+        "refund_003",
+        "refund_009",
+    ]
 
 
 def test_fixed_version_has_no_regressions_against_baseline() -> None:
@@ -31,4 +37,3 @@ def test_markdown_report_contains_metric_and_task_details() -> None:
     assert "refund_001" in rendered
     assert "query_order, search_policy" in rendered
     assert "estimate_delivery" in rendered
-

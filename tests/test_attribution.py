@@ -28,7 +28,8 @@ def test_attribution_diagnoses_all_regressions() -> None:
         baseline=VERSIONS["baseline"], candidate=VERSIONS["regression"]
     )
 
-    assert [item.task_id for item in attributions] == ["refund_001", "refund_002"]
+    assert len(attributions) == 10
+    assert [item.task_id for item in attributions[:2]] == ["refund_001", "refund_002"]
     assert {item.category for item in attributions} == {"tool_selection_error"}
     assert "refund_001" in render_markdown(attributions)
 
@@ -39,4 +40,3 @@ def test_fixed_version_produces_no_attributions() -> None:
     )
 
     assert attributions == ()
-

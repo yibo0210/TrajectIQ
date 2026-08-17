@@ -13,6 +13,7 @@ class AgentVersion:
 @dataclass(frozen=True)
 class Task:
     task_id: str
+    category: str
     input: str
     expected_tools: tuple[str, ...]
     expected_arguments: dict[str, dict[str, Any]]

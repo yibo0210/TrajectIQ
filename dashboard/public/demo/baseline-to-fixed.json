@@ -3,7 +3,7 @@
     "dataset": "customer_support_v1",
     "baseline": {
       "version": "baseline",
-      "task_count": 6,
+      "task_count": 36,
       "success_rate": 1.0,
       "tool_selection_accuracy": 1.0,
       "tool_argument_accuracy": 1.0,
@@ -13,7 +13,7 @@
     },
     "candidate": {
       "version": "fixed",
-      "task_count": 6,
+      "task_count": 36,
       "success_rate": 1.0,
       "tool_selection_accuracy": 1.0,
       "tool_argument_accuracy": 1.0,

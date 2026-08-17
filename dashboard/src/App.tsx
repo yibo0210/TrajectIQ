@@ -1,5 +1,5 @@
-import { useMemo, useState, type ChangeEvent } from "react";
-import { FIXED_REPORT, REGRESSION_DIAGNOSES, REGRESSION_REPORT, type DashboardPayload, type Diagnosis, type Report } from "./reportData";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { type DashboardPayload, type Diagnosis, type Report } from "./reportData";
 import "./styles.css";
 
 type Scenario = "regression" | "fixed";
@@ -17,26 +17,36 @@ function formatPercent(value: number): string {
   return new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1 }).format(value);
 }
 
-function getStatus(report: Report): "PASS" | "WARNING" | "BLOCK" {
-  return report.regressions.length === 0 ? "PASS" : "BLOCK";
-}
-
 function getDiagnosis(taskId: string, diagnoses: Diagnosis[]): Diagnosis | undefined {
   return diagnoses.find((diagnosis) => diagnosis.task_id === taskId);
 }
 
 export function App() {
   const [scenario, setScenario] = useState<Scenario>("regression");
+  const [demoPayloads, setDemoPayloads] = useState<Partial<Record<Scenario, DashboardPayload>>>({});
+  const [demoError, setDemoError] = useState<string | null>(null);
   const [importedPayload, setImportedPayload] = useState<DashboardPayload | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState("refund_001");
   const [activeView, setActiveView] = useState<View>("overview");
-  const report = importedPayload?.report ?? (scenario === "regression" ? REGRESSION_REPORT : FIXED_REPORT);
-  const diagnoses = importedPayload?.diagnoses ?? (scenario === "regression" ? REGRESSION_DIAGNOSES : []);
-  const status = importedPayload?.gate.status ?? getStatus(report);
+  useEffect(() => {
+    Promise.all([
+      fetch("/demo/baseline-to-regression.json").then((response) => response.json() as Promise<DashboardPayload>),
+      fetch("/demo/baseline-to-fixed.json").then((response) => response.json() as Promise<DashboardPayload>),
+    ]).then(([regression, fixed]) => setDemoPayloads({ regression, fixed }))
+      .catch(() => setDemoError("Unable to load the bundled Dashboard artifacts."));
+  }, []);
+
+  const payload = importedPayload ?? demoPayloads[scenario];
+  const report = payload?.report;
+  const diagnoses = payload?.diagnoses ?? [];
+  const status = payload?.gate.status;
+  if (!report || !status) {
+    return <main className="app-shell"><p className="empty-state">{demoError ?? "Loading release diagnostics..."}</p></main>;
+  }
   const selectedTask = report.regressions.find((task) => task.task_id === selectedTaskId);
   const selectedDiagnosis = selectedTask ? getDiagnosis(selectedTask.task_id, diagnoses) : undefined;
-  const summary = useMemo(() => status === "PASS" ? "All release thresholds passed. The candidate is ready for promotion." : report.regressions.length + " task regressions detected, including " + report.regressions.filter((task) => task.is_critical).length + " critical task.", [report.regressions, status]);
+  const summary = status === "PASS" ? "All release thresholds passed. The candidate is ready for promotion." : report.regressions.length + " task regressions detected, including " + report.regressions.filter((task) => task.is_critical).length + " critical task.";
 
   function selectScenario(nextScenario: Scenario) {
     setScenario(nextScenario);

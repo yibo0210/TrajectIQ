@@ -31,15 +31,19 @@ def _plan_tools(*, version: AgentVersion, task: Task) -> list[tuple[str, dict[st
     input_lowercase = task.input.lower()
     if version.tool_policy == "regression" and "refund" in input_lowercase:
         return [("estimate_delivery", {"order_id": order_id})]
-    if "transfer" in input_lowercase or "person" in input_lowercase:
+    if "transfer" in input_lowercase or "person" in input_lowercase or "ticket" in input_lowercase:
         return [("create_ticket", {"reason": task.input})]
-    if "arrive" in input_lowercase:
-        return [("query_order", {"order_id": order_id}), ("estimate_delivery", {"order_id": order_id})]
-    if "refund" in input_lowercase or "order" in input_lowercase:
+    if "refund" in input_lowercase:
         planned_tools = [("query_order", {"order_id": order_id})]
         if "when" in input_lowercase:
             planned_tools.append(("search_policy", {"topic": "refund_timeline"}))
         return planned_tools
+    if "arriv" in input_lowercase:
+        return [("query_order", {"order_id": order_id}), ("estimate_delivery", {"order_id": order_id})]
+    if "order" in input_lowercase:
+        return [("query_order", {"order_id": order_id})]
+    if order_id:
+        return [("query_order", {"order_id": order_id})]
     if "return" in input_lowercase:
         return [("search_policy", {"topic": "return_opened"})]
     return []
