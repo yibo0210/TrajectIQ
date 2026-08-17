@@ -91,7 +91,8 @@ export function App() {
 
   return <main className="app-shell">
     <header className="topbar">
-      <div className="brand"><div className="brand-mark">TQ</div><div><h1>TrajectIQ</h1><p>多工具 Agent 发布诊断平台</p></div></div>
+      <div className="brand"><div className="brand-mark"><span>T</span><span>Q</span></div><div><h1>TrajectIQ</h1><p>多工具 Agent 发布诊断平台</p></div></div>
+      <span className="environment">EVALUATION / CUSTOMER SUPPORT</span>
       <div className="scenario-toggle">
         <button className={scenario === "regression" ? "selected" : ""} onClick={() => selectScenario("regression")}>回归版本</button>
         <button className={scenario === "fixed" ? "selected" : ""} onClick={() => selectScenario("fixed")}>修复版本</button>
@@ -100,8 +101,8 @@ export function App() {
     </header>
     {importError && <p className="import-error">{importError}</p>}
     <section className="release-banner">
-      <div><p className="eyebrow">发布决策</p><h2>{status === "PASS" ? "候选版本可发布" : status === "WARNING" ? "候选版本需要人工复核" : "候选版本已被发布门禁拦截"}</h2><p>{summary}</p></div>
-      <div className={status === "PASS" ? "status status-pass" : status === "WARNING" ? "status status-warning" : "status status-block"}>{status}</div>
+      <div className="release-copy"><p className="eyebrow">发布决策 / Release decision</p><h2>{status === "PASS" ? "候选版本可发布" : status === "WARNING" ? "候选版本需要人工复核" : "候选版本已被发布门禁拦截"}</h2><p>{summary}</p></div>
+      <div className="release-meta"><span>质量门禁</span><div className={status === "PASS" ? "status status-pass" : status === "WARNING" ? "status status-warning" : "status status-block"}>{status}</div></div>
     </section>
     <nav className="tabs">
       <button className={activeView === "overview" ? "active" : ""} onClick={() => setActiveView("overview")}>质量概览</button>
@@ -109,8 +110,8 @@ export function App() {
       <button className={activeView === "diagnosis" ? "active" : ""} onClick={() => setActiveView("diagnosis")}>首错诊断</button>
     </nav>
     {activeView === "overview" && <section className="content-grid">
-      <div className="section-heading"><div><p className="eyebrow">版本对比</p><h2>{report.baseline.version} 至 {report.candidate.version}</h2></div><span className="dataset">数据集：{report.dataset}</span></div>
-      <div className="metrics-grid">{metrics.map(([label, key]) => { const baseline = report.baseline[key]; const candidate = report.candidate[key]; const delta = candidate - baseline; return <article className="metric" key={key}><p>{label}</p><strong>{formatPercent(candidate)}</strong><span className={delta < 0 ? "delta negative" : "delta positive"}>{(delta >= 0 ? "+" : "") + formatPercent(delta)} vs baseline</span></article>; })}</div>
+      <div className="section-heading"><div><p className="eyebrow">版本对比 / Version diff</p><h2>{report.baseline.version} <span>→</span> {report.candidate.version}</h2></div><span className="dataset">数据集：{report.dataset} · {report.baseline.task_count} 条任务</span></div>
+      <div className="metrics-grid">{metrics.map(([label, key]) => { const baseline = report.baseline[key]; const candidate = report.candidate[key]; const delta = candidate - baseline; return <article className="metric" key={key}><div className="metric-top"><p>{label}</p><span className={delta < 0 ? "delta negative" : "delta positive"}>{(delta >= 0 ? "+" : "") + formatPercent(delta)}</span></div><strong>{formatPercent(candidate)}</strong><div className="metric-meter" aria-label={`${label} ${formatPercent(candidate)}`}><span style={{ width: `${candidate * 100}%` }} /></div><small>基线 {formatPercent(baseline)}</small></article>; })}</div>
       <article className="finding-panel"><div><p className="eyebrow">门禁结论</p><h3>{status === "PASS" ? "未发现发布阻塞项" : "当前版本的阻塞原因"}</h3></div>{status === "PASS" ? <p>任务质量与关键任务检查均达到发布要求。</p> : <ul>{payload.gate.violations.map((violation) => <li key={violation.rule}>{formatViolation(violation.rule)}</li>)}</ul>}</article>
     </section>}
     {activeView === "tasks" && <section className="content-grid"><div className="section-heading"><div><p className="eyebrow">任务级退化</p><h2>{report.regressions.length} 条受影响任务</h2></div></div>{report.regressions.length === 0 ? <div className="empty-state">当前候选版本未发现任务退化。</div> : <div className="task-list">{report.regressions.map((task) => <button className={selectedTaskId === task.task_id ? "task-row selected" : "task-row"} key={task.task_id} onClick={() => { setSelectedTaskId(task.task_id); setActiveView("diagnosis"); }}><span className={task.is_critical ? "priority critical" : "priority"}>{task.is_critical ? "关键任务" : "常规任务"}</span><strong>{task.task_id}</strong><span>预期：{task.expected_tools.join(" -> ")}</span><span>实际：{task.actual_tools.join(" -> ")}</span></button>)}</div>}</section>}

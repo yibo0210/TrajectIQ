@@ -9,6 +9,7 @@ export type Report = {
   dataset: string;
   baseline: {
     version: string;
+    task_count: number;
     success_rate: number;
     tool_selection_accuracy: number;
     tool_argument_accuracy: number;
@@ -17,6 +18,7 @@ export type Report = {
   };
   candidate: {
     version: string;
+    task_count: number;
     success_rate: number;
     tool_selection_accuracy: number;
     tool_argument_accuracy: number;
