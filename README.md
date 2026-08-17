@@ -2,6 +2,7 @@
 
 TrajectIQ 是一个面向多工具 Agent 的发布质量诊断平台。项目以 Phoenix 和 OpenTelemetry 提供可观测性基础，在此之上实现版本回归评测、首错定位与 CI 发布门禁。
 
+
 ## 项目状态
 
 `v0.7` 已完成：确定性 Agent 运行时、Phoenix Trace 导出、36 条评测集、回归诊断、YAML 门禁、GitHub Actions 和独立 Dashboard。
