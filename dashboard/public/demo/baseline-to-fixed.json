@@ -1,0 +1,39 @@
+{
+  "report": {
+    "dataset": "customer_support_v1",
+    "baseline": {
+      "version": "baseline",
+      "task_count": 6,
+      "success_rate": 1.0,
+      "tool_selection_accuracy": 1.0,
+      "tool_argument_accuracy": 1.0,
+      "answer_coverage": 1.0,
+      "average_steps": 1.3333333333333333,
+      "critical_task_success_rate": 1.0
+    },
+    "candidate": {
+      "version": "fixed",
+      "task_count": 6,
+      "success_rate": 1.0,
+      "tool_selection_accuracy": 1.0,
+      "tool_argument_accuracy": 1.0,
+      "answer_coverage": 1.0,
+      "average_steps": 1.3333333333333333,
+      "critical_task_success_rate": 1.0
+    },
+    "regressions": [],
+    "deltas": {
+      "success_rate": 0.0,
+      "tool_selection_accuracy": 0.0,
+      "tool_argument_accuracy": 0.0,
+      "answer_coverage": 0.0
+    }
+  },
+  "diagnoses": [],
+  "gate": {
+    "status": "PASS",
+    "baseline": "baseline",
+    "candidate": "fixed",
+    "violations": []
+  }
+}

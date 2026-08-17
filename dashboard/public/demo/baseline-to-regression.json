@@ -1,0 +1,126 @@
+{
+  "report": {
+    "dataset": "customer_support_v1",
+    "baseline": {
+      "version": "baseline",
+      "task_count": 6,
+      "success_rate": 1.0,
+      "tool_selection_accuracy": 1.0,
+      "tool_argument_accuracy": 1.0,
+      "answer_coverage": 1.0,
+      "average_steps": 1.3333333333333333,
+      "critical_task_success_rate": 1.0
+    },
+    "candidate": {
+      "version": "regression",
+      "task_count": 6,
+      "success_rate": 0.6666666666666666,
+      "tool_selection_accuracy": 0.6666666666666666,
+      "tool_argument_accuracy": 0.6666666666666666,
+      "answer_coverage": 0.6666666666666666,
+      "average_steps": 1.1666666666666667,
+      "critical_task_success_rate": 0.5
+    },
+    "regressions": [
+      {
+        "task_id": "refund_001",
+        "is_success": false,
+        "has_correct_tools": false,
+        "has_correct_arguments": false,
+        "has_expected_answer": false,
+        "is_critical": true,
+        "actual_tools": [
+          "estimate_delivery"
+        ],
+        "expected_tools": [
+          "query_order",
+          "search_policy"
+        ]
+      },
+      {
+        "task_id": "refund_002",
+        "is_success": false,
+        "has_correct_tools": false,
+        "has_correct_arguments": false,
+        "has_expected_answer": false,
+        "is_critical": false,
+        "actual_tools": [
+          "estimate_delivery"
+        ],
+        "expected_tools": [
+          "query_order"
+        ]
+      }
+    ],
+    "deltas": {
+      "success_rate": -0.33333333333333337,
+      "tool_selection_accuracy": -0.33333333333333337,
+      "tool_argument_accuracy": -0.33333333333333337,
+      "answer_coverage": -0.33333333333333337
+    }
+  },
+  "diagnoses": [
+    {
+      "task_id": "refund_001",
+      "category": "tool_selection_error",
+      "step": 2,
+      "baseline_span": "query_order",
+      "candidate_span": "estimate_delivery",
+      "reason": "Candidate selected a different tool at the first divergent step.",
+      "confidence": 1.0,
+      "is_critical": true
+    },
+    {
+      "task_id": "refund_002",
+      "category": "tool_selection_error",
+      "step": 2,
+      "baseline_span": "query_order",
+      "candidate_span": "estimate_delivery",
+      "reason": "Candidate selected a different tool at the first divergent step.",
+      "confidence": 1.0,
+      "is_critical": false
+    }
+  ],
+  "gate": {
+    "status": "BLOCK",
+    "baseline": "baseline",
+    "candidate": "regression",
+    "violations": [
+      {
+        "rule": "minimum_success_rate",
+        "severity": "block",
+        "actual": 0.6666666666666666,
+        "threshold": 0.9,
+        "message": "Candidate task success rate is below the required minimum."
+      },
+      {
+        "rule": "maximum_success_rate_drop",
+        "severity": "block",
+        "actual": 0.33333333333333337,
+        "threshold": 0.03,
+        "message": "Candidate task success rate regressed beyond the allowed drop."
+      },
+      {
+        "rule": "minimum_tool_selection_accuracy",
+        "severity": "block",
+        "actual": 0.6666666666666666,
+        "threshold": 0.95,
+        "message": "Candidate tool selection accuracy is below the required minimum."
+      },
+      {
+        "rule": "maximum_critical_task_regressions",
+        "severity": "block",
+        "actual": 1,
+        "threshold": 0,
+        "message": "Candidate regressed on more critical tasks than allowed."
+      },
+      {
+        "rule": "maximum_task_regressions",
+        "severity": "warning",
+        "actual": 2,
+        "threshold": 0,
+        "message": "Candidate has more task regressions than the warning threshold."
+      }
+    ]
+  }
+}

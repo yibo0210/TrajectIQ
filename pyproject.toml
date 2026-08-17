@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "trajectiq"
+version = "0.5.0"
+description = "Agent regression diagnostics and release gates for Phoenix"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "opentelemetry-api>=1.0",
+  "opentelemetry-sdk>=1.0",
+  "opentelemetry-exporter-otlp>=1.0",
+  "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+trajectiq = "agentguard.run:main"
+trajectiq-regression = "agentguard.regression:main"
+trajectiq-diagnose = "agentguard.attribution:main"
+trajectiq-gate = "agentguard.gate:main"
+trajectiq-dashboard-data = "agentguard.dashboard_data:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentguard"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,6 @@
+thresholds:
+  minimum_success_rate: 0.90
+  maximum_success_rate_drop: 0.03
+  minimum_tool_selection_accuracy: 0.95
+  maximum_critical_task_regressions: 0
+  maximum_task_regressions: 0

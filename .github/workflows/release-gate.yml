@@ -1,0 +1,20 @@
+name: TrajectIQ release gate
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install TrajectIQ
+        run: python -m pip install -e .[dev]
+      - name: Run tests
+        run: python -m pytest tests -q
+      - name: Enforce release gate
+        run: trajectiq-gate --baseline baseline --candidate fixed
