@@ -19,17 +19,17 @@ dependencies = [
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-trajectiq = "agentguard.run:main"
-trajectiq-regression = "agentguard.regression:main"
-trajectiq-diagnose = "agentguard.attribution:main"
-trajectiq-gate = "agentguard.gate:main"
-trajectiq-dashboard-data = "agentguard.dashboard_data:main"
-trajectiq-trace-regression = "agentguard.trace_io:main"
-trajectiq-openai-demo = "agentguard.openai_compatible:main"
+trajectiq = "trajectiq.run:main"
+trajectiq-regression = "trajectiq.regression:main"
+trajectiq-diagnose = "trajectiq.attribution:main"
+trajectiq-gate = "trajectiq.gate:main"
+trajectiq-dashboard-data = "trajectiq.dashboard_data:main"
+trajectiq-trace-regression = "trajectiq.trace_io:main"
+trajectiq-openai-demo = "trajectiq.openai_compatible:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/agentguard"]
-include = ["src/agentguard/datasets/*.jsonl"]
+packages = ["src/trajectiq"]
+include = ["src/trajectiq/datasets/*.jsonl"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

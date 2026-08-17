@@ -1,5 +1,5 @@
-from agentguard.regression import compare_versions, render_markdown
-from agentguard.run import VERSIONS
+from trajectiq.regression import compare_versions, render_markdown
+from trajectiq.run import VERSIONS
 
 
 def test_regression_report_identifies_refund_tasks_that_degraded() -> None:

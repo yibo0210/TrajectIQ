@@ -1,10 +1,10 @@
 import json
 
-from agentguard.agent import run_task
-from agentguard.data import TASKS
-from agentguard.openinference import load_openinference_export
-from agentguard.run import VERSIONS
-from agentguard.trace_io import compare_trace_collections
+from trajectiq.agent import run_task
+from trajectiq.data import TASKS
+from trajectiq.openinference import load_openinference_export
+from trajectiq.run import VERSIONS
+from trajectiq.trace_io import compare_trace_collections
 
 
 def _write_openinference_export(path, version_name: str) -> None:

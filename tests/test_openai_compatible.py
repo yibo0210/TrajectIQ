@@ -1,5 +1,5 @@
-from agentguard.openai_compatible import AssistantTurn, ToolCall, run_openai_task
-from agentguard.data import TASKS
+from trajectiq.openai_compatible import AssistantTurn, ToolCall, run_openai_task
+from trajectiq.data import TASKS
 
 
 class FakeChatClient:
@@ -24,4 +24,3 @@ def test_live_agent_runner_emits_evaluation_ready_tool_trajectory() -> None:
     assert result["answer"].startswith("Order A1001")
     assert tool_spans[0]["name"] == "query_order"
     assert tool_spans[0]["input"] == {"order_id": "A1001"}
-

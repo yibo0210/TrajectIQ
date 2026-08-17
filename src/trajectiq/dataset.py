@@ -68,7 +68,7 @@ def load_dataset(path: Path, *, name: str, version: str) -> EvaluationDataset:
 
 def load_default_dataset() -> EvaluationDataset:
     """Load the packaged customer-support v1 evaluation dataset."""
-    resource = resources.files("agentguard.datasets").joinpath("customer_support_v1.jsonl")
+    resource = resources.files("trajectiq.datasets").joinpath("customer_support_v1.jsonl")
     with resource.open("r", encoding="utf-8") as handle:
         tasks = _load_rows(handle, source="customer_support_v1.jsonl")
     return EvaluationDataset(name="customer_support", version="v1", tasks=tasks)

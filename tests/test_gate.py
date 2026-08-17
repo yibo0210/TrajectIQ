@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from agentguard.gate import evaluate_gate, load_gate_config
-from agentguard.regression import compare_versions
-from agentguard.run import VERSIONS
+from trajectiq.gate import evaluate_gate, load_gate_config
+from trajectiq.regression import compare_versions
+from trajectiq.run import VERSIONS
 
 
 CONFIG_PATH = Path(__file__).parents[1] / "release-gate.yaml"
@@ -46,4 +46,3 @@ def test_excess_noncritical_regressions_only_warn() -> None:
 
     assert result.status == "WARNING"
     assert [item.rule for item in result.violations] == ["maximum_task_regressions"]
-

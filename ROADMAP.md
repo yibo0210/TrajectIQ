@@ -11,7 +11,7 @@ TrajectIQ is a Phoenix extension for e-commerce support Agent regression diagnos
 - Produce structured trajectories containing planner, tool, and final nodes.
 - Include six representative seed tasks and isolated tests.
 
-Acceptance: `agentguard --version baseline` runs repeatedly with identical results. Each run records its tools, arguments, results, and errors.
+Acceptance: `trajectiq --version baseline` runs repeatedly with identical results. Each run records its tools, arguments, results, and errors.
 
 ### v0.2: Phoenix trace integration
 

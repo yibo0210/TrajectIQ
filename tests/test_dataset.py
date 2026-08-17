@@ -1,4 +1,4 @@
-from agentguard.data import DEFAULT_DATASET, TASKS
+from trajectiq.data import DEFAULT_DATASET, TASKS
 
 
 def test_packaged_dataset_has_a_stable_version_and_business_slices() -> None:

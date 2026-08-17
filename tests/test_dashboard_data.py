@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from agentguard.dashboard_data import build_dashboard_data
+from trajectiq.dashboard_data import build_dashboard_data
 
 
 def test_dashboard_data_contains_report_diagnosis_and_gate() -> None:
@@ -28,4 +28,3 @@ def test_dashboard_data_can_be_serialized_as_json() -> None:
     )
 
     assert json.loads(json.dumps(payload))["gate"]["status"] == "PASS"
-

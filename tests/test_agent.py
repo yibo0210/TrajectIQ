@@ -1,6 +1,6 @@
-from agentguard.agent import run_task
-from agentguard.data import TASKS
-from agentguard.run import VERSIONS
+from trajectiq.agent import run_task
+from trajectiq.data import TASKS
+from trajectiq.run import VERSIONS
 
 
 def _get_task(task_id: str):

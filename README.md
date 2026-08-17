@@ -1,5 +1,7 @@
 # TrajectIQ
 
+[![Release Gate](https://github.com/yibo0210/TrajectIQ/actions/workflows/release-gate.yml/badge.svg)](https://github.com/yibo0210/TrajectIQ/actions/workflows/release-gate.yml)
+
 TrajectIQ 是一个面向多工具 Agent 的发布质量诊断平台。项目以 Phoenix 和 OpenTelemetry 提供可观测性基础，在此之上实现版本回归评测、首错定位与 CI 发布门禁。
 
 ![TrajectIQ Dashboard](docs/dashboard-overview.png)
@@ -11,9 +13,9 @@ TrajectIQ 是一个面向多工具 Agent 的发布质量诊断平台。项目以
 ## 项目结构
 
 ```text
-agentguard/
-├── src/agentguard/       # Agent 运行时、评测与发布门禁
-├── src/agentguard/datasets/ # 版本化 JSONL 评测集
+trajectiq/
+├── src/trajectiq/        # Agent 运行时、评测与发布门禁
+├── src/trajectiq/datasets/ # 版本化 JSONL 评测集
 ├── tests/                # 独立测试
 ├── dashboard/            # React 发布诊断界面
 ├── ARCHITECTURE.md        # 组件关系与数据流
@@ -107,7 +109,7 @@ trajectiq-openai-demo --task-id refund_001 --output exports/live-candidate.json
 trajectiq-openai-demo --task-id refund_001 --trace --endpoint http://localhost:6006
 ```
 
-`--all` 才会运行完整 36 条评测任务；API Key 仅从环境变量读取，不会写入报告。
+`--all` 才会运行完整 36 条评测任务；API Key 仅从环境变量读取，不会写入报告。可从 `.env.example` 查看需要配置的环境变量；面试或项目演示可参考 [项目讲解](docs/interview-guide.md)。
 
 评测集以 JSONL 管理，每条任务包含类别、标签、关键任务标识、预期工具链、参数和回答断言。可通过 `--dataset` 传入自己的版本化数据集。完整格式见 [外部轨迹接入说明](docs/trajectory-schema.md)。
 

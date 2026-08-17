@@ -2,16 +2,16 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-from agentguard.agent import run_task
-from agentguard.data import TASKS
-from agentguard.run import VERSIONS
+from trajectiq.agent import run_task
+from trajectiq.data import TASKS
+from trajectiq.run import VERSIONS
 
 
 def test_traced_task_has_one_root_and_four_child_spans() -> None:
     exporter = InMemorySpanExporter()
     provider = TracerProvider()
     provider.add_span_processor(SimpleSpanProcessor(exporter))
-    tracer = provider.get_tracer("agentguard-test")
+    tracer = provider.get_tracer("trajectiq-test")
     task = next(value for value in TASKS if value.task_id == "refund_001")
 
     run_task(version=VERSIONS["baseline"], task=task, tracer=tracer)

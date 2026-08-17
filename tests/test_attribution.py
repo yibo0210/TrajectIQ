@@ -1,7 +1,7 @@
-from agentguard.attribution import attribute_regressions, locate_first_error, render_markdown
-from agentguard.agent import run_task
-from agentguard.data import TASKS
-from agentguard.run import VERSIONS
+from trajectiq.attribution import attribute_regressions, locate_first_error, render_markdown
+from trajectiq.agent import run_task
+from trajectiq.data import TASKS
+from trajectiq.run import VERSIONS
 
 
 def _get_task(task_id: str):

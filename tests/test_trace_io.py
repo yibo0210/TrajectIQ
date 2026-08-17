@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from agentguard.agent import run_task
-from agentguard.data import TASKS
-from agentguard.run import VERSIONS
-from agentguard.trace_io import compare_trace_collections, load_trace_collection
+from trajectiq.agent import run_task
+from trajectiq.data import TASKS
+from trajectiq.run import VERSIONS
+from trajectiq.trace_io import compare_trace_collections, load_trace_collection
 
 
 def _write_trace_export(path, version_name: str) -> None:
