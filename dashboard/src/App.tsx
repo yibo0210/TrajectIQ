@@ -64,6 +64,7 @@ export function App() {
   }
   const selectedTask = report.regressions.find((task) => task.task_id === selectedTaskId);
   const selectedDiagnosis = selectedTask ? getDiagnosis(selectedTask.task_id, diagnoses) : undefined;
+  const candidateVersion = report.candidate.version;
   const summary = status === "PASS" ? "所有发布阈值均已满足，当前版本可以进入发布流程。" : `发现 ${report.regressions.length} 条任务退化，其中 ${report.regressions.filter((task) => task.is_critical).length} 条为关键任务。`;
 
   function selectScenario(nextScenario: Scenario) {
@@ -89,6 +90,16 @@ export function App() {
     }).catch(() => setImportError("该文件不是有效的 TrajectIQ Dashboard 报告。"));
   }
 
+  function exportReport() {
+    const content = JSON.stringify(payload, null, 2);
+    const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `trajectiq-${candidateVersion}-report.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return <main className="app-shell">
     <header className="topbar">
       <div className="brand"><div className="brand-mark"><span>T</span><span>Q</span></div><div><h1>TrajectIQ</h1><p>多工具 Agent 发布诊断平台</p></div></div>
@@ -98,11 +109,18 @@ export function App() {
         <button className={scenario === "fixed" ? "selected" : ""} onClick={() => selectScenario("fixed")}>修复版本</button>
       </div>
       <label className="import-control">导入 JSON<input type="file" accept="application/json" onChange={importReport} /></label>
+      <button className="export-control" onClick={exportReport}>导出报告</button>
     </header>
     {importError && <p className="import-error">{importError}</p>}
     <section className="release-banner">
       <div className="release-copy"><p className="eyebrow">发布决策 / Release decision</p><h2>{status === "PASS" ? "候选版本可发布" : status === "WARNING" ? "候选版本需要人工复核" : "候选版本已被发布门禁拦截"}</h2><p>{summary}</p></div>
-      <div className="release-meta"><span>质量门禁</span><div className={status === "PASS" ? "status status-pass" : status === "WARNING" ? "status status-warning" : "status status-block"}>{status}</div></div>
+      <div className="release-meta"><span>质量门禁</span><div className={status === "PASS" ? "status status-pass" : status === "WARNING" ? "status status-warning" : "status status-block"}>{status}</div><small>{payload.gate.violations.length} 条规则命中</small></div>
+    </section>
+    <section className="run-context" aria-label="本次评测上下文">
+      <span><b>评测来源</b>{importedPayload ? "导入报告" : "内置可复现样例"}</span>
+      <span><b>门禁配置</b>release-gate.yaml</span>
+      <span><b>任务规模</b>{report.baseline.task_count} cases</span>
+      <span><b>诊断覆盖</b>{diagnoses.length} first-error findings</span>
     </section>
     <nav className="tabs">
       <button className={activeView === "overview" ? "active" : ""} onClick={() => setActiveView("overview")}>质量概览</button>
