@@ -75,3 +75,11 @@ Acceptance: an external baseline/candidate trace pair produces the same determin
 - Keep external traces on the same version comparison and category-slice path as the built-in fixture.
 
 Acceptance: a raw OpenInference baseline/candidate export reproduces all ten deterministic refund regressions without manual trace normalization.
+
+### v1.0: Real tool-calling Agent example (complete)
+
+- Add an OpenAI-compatible Chat Completions runner with function-tool calling.
+- Emit evaluation-ready AGENT, LLM, and TOOL OpenInference spans while executing real model decisions.
+- Keep single-task default execution and explicit opt-in for full-dataset calls to control API cost.
+
+Acceptance: with an API key configured, one live task produces a standard TrajectIQ trajectory that can be evaluated or inspected in Phoenix.

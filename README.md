@@ -6,7 +6,7 @@ TrajectIQ 是一个面向多工具 Agent 的发布质量诊断平台。项目以
 
 ## 项目状态
 
-`v0.9` 已完成：确定性 Agent 运行时、Phoenix/OpenInference Trace 适配、版本化 36 条评测集、回归诊断、YAML 门禁、PR 质量反馈和独立 Dashboard。
+`v1.0` 已完成：确定性 Agent 运行时、真实 OpenAI 兼容工具调用 Agent、Phoenix/OpenInference Trace 适配、版本化 36 条评测集、回归诊断、YAML 门禁、PR 质量反馈和独立 Dashboard。
 
 ## 项目结构
 
@@ -93,6 +93,21 @@ trajectiq-trace-regression \
   --candidate-traces exports/candidate-otel.json \
   --input-format openinference
 ```
+
+项目还提供一个真实 OpenAI 兼容工具调用示例。配置 API Key 后默认只运行一条任务，避免意外消耗额度：
+
+```bash
+$env:OPENAI_API_KEY = "your-key"
+trajectiq-openai-demo --task-id refund_001 --output exports/live-candidate.json
+```
+
+需要同时导出到 Phoenix 时：
+
+```bash
+trajectiq-openai-demo --task-id refund_001 --trace --endpoint http://localhost:6006
+```
+
+`--all` 才会运行完整 36 条评测任务；API Key 仅从环境变量读取，不会写入报告。
 
 评测集以 JSONL 管理，每条任务包含类别、标签、关键任务标识、预期工具链、参数和回答断言。可通过 `--dataset` 传入自己的版本化数据集。完整格式见 [外部轨迹接入说明](docs/trajectory-schema.md)。
 

@@ -13,7 +13,8 @@ def _get_order_id(text: str) -> str | None:
     return match.group(0) if match else None
 
 
-def _call_tool(tool_name: str, arguments: dict[str, Any]) -> tuple[Any, str | None]:
+def call_tool(tool_name: str, arguments: dict[str, Any]) -> tuple[Any, str | None]:
+    """Execute a support tool for both the deterministic and live Agent runners."""
     if tool_name == "query_order":
         order = ORDERS.get(arguments.get("order_id"))
         return (order, None) if order else (None, "order_not_found")
@@ -64,7 +65,7 @@ def _run_task(*, version: AgentVersion, task: Task, tracer: Any | None) -> dict[
             tool_span.set_attribute("openinference.span.kind", "TOOL")
             tool_span.set_attribute("tool.name", tool_name)
             tool_span.set_attribute("input.value", str(arguments))
-            output, error = _call_tool(tool_name, arguments)
+            output, error = call_tool(tool_name, arguments)
             tool_span.set_attribute("output.value", str(output))
             if error:
                 tool_span.set_attribute("error.type", error)

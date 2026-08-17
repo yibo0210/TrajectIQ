@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "trajectiq"
-version = "0.5.0"
+version = "1.0.0"
 description = "Agent regression diagnostics and release gates for Phoenix"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,6 +25,7 @@ trajectiq-diagnose = "agentguard.attribution:main"
 trajectiq-gate = "agentguard.gate:main"
 trajectiq-dashboard-data = "agentguard.dashboard_data:main"
 trajectiq-trace-regression = "agentguard.trace_io:main"
+trajectiq-openai-demo = "agentguard.openai_compatible:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agentguard"]
