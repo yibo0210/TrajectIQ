@@ -24,9 +24,11 @@ trajectiq-regression = "agentguard.regression:main"
 trajectiq-diagnose = "agentguard.attribution:main"
 trajectiq-gate = "agentguard.gate:main"
 trajectiq-dashboard-data = "agentguard.dashboard_data:main"
+trajectiq-trace-regression = "agentguard.trace_io:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agentguard"]
+include = ["src/agentguard/datasets/*.jsonl"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

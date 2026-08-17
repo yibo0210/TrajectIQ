@@ -19,6 +19,7 @@ class Task:
     expected_arguments: dict[str, dict[str, Any]]
     expected_answer_contains: tuple[str, ...]
     critical: bool = False
+    tags: tuple[str, ...] = ()
 
 
 @dataclass

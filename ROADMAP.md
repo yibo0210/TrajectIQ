@@ -59,3 +59,11 @@ Acceptance: a degraded candidate blocks the pipeline and identifies remediation 
 - Bundle Dashboard artifacts generated from the real baseline-to-regression and baseline-to-fixed runs.
 
 Acceptance: the regression fixture produces ten diagnosed refund regressions, while the fixed candidate passes the release gate.
+
+### v0.8: External trace evaluation and PR quality feedback (complete)
+
+- Load the 36-task suite from a packaged JSONL dataset with categories and tags.
+- Evaluate normalized trajectory exports from external Agent runtimes with the same regression engine.
+- Publish Markdown gate reports as GitHub Actions summaries, artifacts, and updatable pull-request comments.
+
+Acceptance: an external baseline/candidate trace pair produces the same deterministic regression report as the built-in Agent fixture.

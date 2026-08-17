@@ -2,10 +2,11 @@
 
 ~~~mermaid
 flowchart LR
-  A[Customer-support tasks] --> B[Deterministic multi-tool Agent]
+  A[Versioned JSONL task dataset] --> B[Deterministic multi-tool Agent]
+  A --> E[Regression evaluator]
   B --> C[OpenTelemetry traces]
   C --> D[Phoenix]
-  B --> E[Regression evaluator]
+  X[External Agent trajectories] --> E
   E --> F[First-error attribution]
   E --> G[YAML release gate]
   F --> H[Dashboard data artifact]
@@ -16,11 +17,11 @@ flowchart LR
 
 ## Ownership
 
-Phoenix owns trace ingestion, storage, exploration, datasets, experiments, and general evaluators. TrajectIQ owns the customer-support Agent fixture, version comparison, task-level regression detection, first-error attribution, release-gate policy, CI artifact generation, and the standalone dashboard.
+Phoenix owns trace ingestion, storage, exploration, datasets, experiments, and general evaluators. TrajectIQ owns the customer-support Agent fixture, normalized external-trajectory adapter, versioned evaluation dataset, version comparison, task-level regression detection, first-error attribution, release-gate policy, CI artifact generation, and the standalone dashboard.
 
 ## Data flow
 
-1. The Agent executes the same task set under a baseline and a candidate configuration.
+1. The built-in Agent or an external runtime provides normalized trajectories for the same versioned task set.
 2. The evaluator compares task success, tool choice, tool parameters, and final-answer expectations.
 3. The attribution module aligns both trajectories and finds the first divergent step.
 4. The release gate evaluates quality thresholds from release-gate.yaml.

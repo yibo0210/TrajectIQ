@@ -22,6 +22,50 @@
       "critical_task_success_rate": 1.0
     },
     "regressions": [],
+    "slices": [
+      {
+        "category": "delivery",
+        "task_count": 7,
+        "baseline_success_rate": 1.0,
+        "candidate_success_rate": 1.0,
+        "regression_count": 0
+      },
+      {
+        "category": "escalation",
+        "task_count": 6,
+        "baseline_success_rate": 1.0,
+        "candidate_success_rate": 1.0,
+        "regression_count": 0
+      },
+      {
+        "category": "order_status",
+        "task_count": 8,
+        "baseline_success_rate": 1.0,
+        "candidate_success_rate": 1.0,
+        "regression_count": 0
+      },
+      {
+        "category": "refund_status",
+        "task_count": 5,
+        "baseline_success_rate": 1.0,
+        "candidate_success_rate": 1.0,
+        "regression_count": 0
+      },
+      {
+        "category": "refund_timeline",
+        "task_count": 5,
+        "baseline_success_rate": 1.0,
+        "candidate_success_rate": 1.0,
+        "regression_count": 0
+      },
+      {
+        "category": "return_policy",
+        "task_count": 5,
+        "baseline_success_rate": 1.0,
+        "candidate_success_rate": 1.0,
+        "regression_count": 0
+      }
+    ],
     "deltas": {
       "success_rate": 0.0,
       "tool_selection_accuracy": 0.0,

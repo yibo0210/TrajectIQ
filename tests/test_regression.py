@@ -17,6 +17,8 @@ def test_regression_report_identifies_refund_tasks_that_degraded() -> None:
         "refund_003",
         "refund_009",
     ]
+    refund_slices = [item for item in report.slices if item.category.startswith("refund_")]
+    assert sum(item.regression_count for item in refund_slices) == 10
 
 
 def test_fixed_version_has_no_regressions_against_baseline() -> None:
@@ -37,3 +39,4 @@ def test_markdown_report_contains_metric_and_task_details() -> None:
     assert "refund_001" in rendered
     assert "query_order, search_policy" in rendered
     assert "estimate_delivery" in rendered
+    assert "Category slices" in rendered

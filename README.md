@@ -6,13 +6,14 @@ TrajectIQ 是一个面向多工具 Agent 的发布质量诊断平台。项目以
 
 ## 项目状态
 
-`v0.7` 已完成：确定性 Agent 运行时、Phoenix Trace 导出、36 条评测集、回归诊断、YAML 门禁、GitHub Actions 和独立 Dashboard。
+`v0.8` 已完成：确定性 Agent 运行时、外部轨迹接入、版本化 36 条评测集、回归诊断、YAML 门禁、PR 质量反馈和独立 Dashboard。
 
 ## 项目结构
 
 ```text
 agentguard/
 ├── src/agentguard/       # Agent 运行时、评测与发布门禁
+├── src/agentguard/datasets/ # 版本化 JSONL 评测集
 ├── tests/                # 独立测试
 ├── dashboard/            # React 发布诊断界面
 ├── ARCHITECTURE.md        # 组件关系与数据流
@@ -27,6 +28,7 @@ agentguard/
 - 对基线通过、候选失败的任务识别回归，并定位第一处工具调用分歧。
 - 将任务成功率、工具选择、参数正确性、回答覆盖率和关键任务质量写入发布门禁。
 - 生成 Dashboard JSON，一页展示发布结论、任务退化和执行轨迹。
+- 支持导入任意 Agent 的标准化执行轨迹，对接同一套评测与回归判断逻辑。
 
 其中 `regression` 版本会故意将退款请求错误路由至 `estimate_delivery`。它稳定产生 10 条退款回归，其中 3 条是关键任务；`fixed` 版本可通过默认门禁。
 
@@ -72,6 +74,23 @@ pnpm dev
 trajectiq-dashboard-data --baseline baseline --candidate regression --output dashboard-report.json
 ```
 
+## 外部 Agent 轨迹评测
+
+TrajectIQ 不只评测仓库内置 Agent。任何运行时只要将执行结果转换为 TrajectIQ 的轻量 JSON 轨迹格式，即可完成版本比较：
+
+```bash
+trajectiq-trace-regression \
+  --baseline-traces exports/baseline.json \
+  --candidate-traces exports/candidate.json \
+  --format markdown
+```
+
+评测集以 JSONL 管理，每条任务包含类别、标签、关键任务标识、预期工具链、参数和回答断言。可通过 `--dataset` 传入自己的版本化数据集。完整格式见 [外部轨迹接入说明](docs/trajectory-schema.md)。
+
+## CI 质量反馈
+
+GitHub Actions 会执行测试与发布门禁，将 Markdown 报告上传为 Artifact，同时写入工作流摘要；在 Pull Request 中会更新同一条 TrajectIQ 质量评论。
+
 ## Phoenix Trace 导出
 
 启动 Phoenix 后执行：
@@ -84,4 +103,4 @@ trajectiq --version baseline --trace --endpoint http://localhost:6006
 
 ## 项目边界
 
-Phoenix 负责 Trace 存储、界面、数据集和评测基础设施；TrajectIQ 独立实现版本快照、回归比较、首错归因和发布门禁，因此可以作为完整的 Agent 质量工程个人项目运行与演示。
+Phoenix 负责 Trace 存储、界面、数据集和评测基础设施；TrajectIQ 独立实现轨迹适配、版本化评测集、回归比较、首错归因和发布门禁，因此可以作为完整的 Agent 质量工程个人项目运行与演示。
