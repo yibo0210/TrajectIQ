@@ -109,7 +109,7 @@ trajectiq-openai-demo --task-id refund_001 --output exports/live-candidate.json
 trajectiq-openai-demo --task-id refund_001 --trace --endpoint http://localhost:6006
 ```
 
-`--all` 才会运行完整 36 条评测任务；API Key 仅从环境变量读取，不会写入报告。可从 `.env.example` 查看需要配置的环境变量；面试或项目演示可参考 [项目讲解](docs/interview-guide.md)。
+`--all` 才会运行完整 36 条评测任务；API Key 仅从环境变量读取，不会写入报告。可从 `.env.example` 查看需要配置的环境变量；面试或项目演示可参考 [项目讲解](docs/interview-guide.md)。系统学习 Phoenix、OpenInference 与 TrajectIQ，请参考 [面试学习手册](docs/phoenix-trajectiq-study-guide.md)。
 
 评测集以 JSONL 管理，每条任务包含类别、标签、关键任务标识、预期工具链、参数和回答断言。可通过 `--dataset` 传入自己的版本化数据集。完整格式见 [外部轨迹接入说明](docs/trajectory-schema.md)。
 
