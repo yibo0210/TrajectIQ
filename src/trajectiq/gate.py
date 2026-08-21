@@ -71,6 +71,16 @@ def evaluate_gate(*, report: RegressionReport, config: dict[str, Any]) -> GateRe
     if maximum_task_regressions is not None and len(report.regressions) > maximum_task_regressions:
         violations.append(GateViolation("maximum_task_regressions", "warning", len(report.regressions), maximum_task_regressions, "Candidate has more task regressions than the warning threshold."))
 
+    metric_rules = (
+        ("maximum_average_latency_ms", report.candidate.average_latency_ms, "block", "Candidate average latency is above the allowed threshold."),
+        ("maximum_average_total_tokens", report.candidate.average_total_tokens, "warning", "Candidate average token usage is above the allowed threshold."),
+        ("maximum_average_cost_usd", report.candidate.average_cost_usd, "warning", "Candidate average estimated cost is above the allowed threshold."),
+    )
+    for rule, actual, severity, message in metric_rules:
+        threshold = thresholds.get(rule)
+        if threshold is not None and actual > threshold:
+            violations.append(GateViolation(rule, severity, actual, threshold, message))
+
     status = "BLOCK" if any(item.severity == "block" for item in violations) else "WARNING" if violations else "PASS"
     return GateResult(status=status, baseline=report.baseline.version, candidate=report.candidate.version, violations=tuple(violations))
 

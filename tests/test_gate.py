@@ -46,3 +46,14 @@ def test_excess_noncritical_regressions_only_warn() -> None:
 
     assert result.status == "WARNING"
     assert [item.rule for item in result.violations] == ["maximum_task_regressions"]
+
+
+def test_production_metric_thresholds_are_enforced() -> None:
+    report = compare_versions(baseline=VERSIONS["baseline"], candidate=VERSIONS["fixed"])
+    result = evaluate_gate(
+        report=report,
+        config={"thresholds": {"maximum_average_latency_ms": 1}},
+    )
+
+    assert result.status == "BLOCK"
+    assert result.violations[0].rule == "maximum_average_latency_ms"

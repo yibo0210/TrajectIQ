@@ -9,7 +9,12 @@
       "tool_argument_accuracy": 1.0,
       "answer_coverage": 1.0,
       "average_steps": 1.3333333333333333,
-      "critical_task_success_rate": 1.0
+      "critical_task_success_rate": 1.0,
+      "average_latency_ms": 35.083333333333336,
+      "average_prompt_tokens": 39.888888888888886,
+      "average_completion_tokens": 55.27777777777778,
+      "average_total_tokens": 95.16666666666667,
+      "average_cost_usd": 3.915000000000001e-05
     },
     "candidate": {
       "version": "regression",
@@ -19,7 +24,12 @@
       "tool_argument_accuracy": 0.7222222222222222,
       "answer_coverage": 0.7222222222222222,
       "average_steps": 1.1944444444444444,
-      "critical_task_success_rate": 0.25
+      "critical_task_success_rate": 0.25,
+      "average_latency_ms": 33.833333333333336,
+      "average_prompt_tokens": 35.02777777777778,
+      "average_completion_tokens": 42.638888888888886,
+      "average_total_tokens": 77.66666666666667,
+      "average_cost_usd": 3.083750000000001e-05
     },
     "regressions": [
       {
@@ -216,7 +226,10 @@
       "success_rate": -0.2777777777777778,
       "tool_selection_accuracy": -0.2777777777777778,
       "tool_argument_accuracy": -0.2777777777777778,
-      "answer_coverage": -0.2777777777777778
+      "answer_coverage": -0.2777777777777778,
+      "average_latency_ms": -1.25,
+      "average_total_tokens": -17.5,
+      "average_cost_usd": -8.312499999999999e-06
     }
   },
   "diagnoses": [

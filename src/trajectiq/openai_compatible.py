@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from dataclasses import dataclass
@@ -14,7 +15,9 @@ from opentelemetry import trace as trace_api
 from .agent import call_tool
 from .data import TASKS
 from .models import Span, Task
+from .metrics import aggregate_run_metrics, estimate_cost
 from .telemetry import configure_tracing
+from .mock_openai import start_mock_server
 
 
 SYSTEM_PROMPT = """You are an e-commerce support Agent. Use the available tools when needed.
@@ -39,6 +42,8 @@ class ToolCall:
 class AssistantTurn:
     content: str
     tool_calls: tuple[ToolCall, ...] = ()
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
 
 
 class ChatClient(Protocol):
@@ -80,7 +85,13 @@ class OpenAICompatibleClient:
             )
             for item in message.get("tool_calls", [])
         )
-        return AssistantTurn(content=message.get("content") or "", tool_calls=tool_calls)
+        usage = payload.get("usage", {})
+        return AssistantTurn(
+            content=message.get("content") or "",
+            tool_calls=tool_calls,
+            prompt_tokens=int(usage.get("prompt_tokens", 0) or 0),
+            completion_tokens=int(usage.get("completion_tokens", 0) or 0),
+        )
 
 
 def run_openai_task(*, task: Task, client: ChatClient, tracer: Any | None = None, max_turns: int = 4) -> dict[str, Any]:
@@ -95,11 +106,35 @@ def run_openai_task(*, task: Task, client: ChatClient, tracer: Any | None = None
         root_span.set_attribute("trajectiq.task_id", task.task_id)
         root_span.set_attribute("input.value", task.input)
         for turn in range(max_turns):
+            started = time.perf_counter()
             with resolved_tracer.start_as_current_span("llm_turn") as llm_span:
                 llm_span.set_attribute("openinference.span.kind", "LLM")
                 llm_span.set_attribute("input.value", json.dumps(messages))
                 response = client.complete(messages)
                 llm_span.set_attribute("output.value", response.content)
+                llm_span.set_attribute("llm.token_count.prompt", response.prompt_tokens)
+                llm_span.set_attribute("llm.token_count.completion", response.completion_tokens)
+                llm_span.set_attribute("llm.token_count.total", response.prompt_tokens + response.completion_tokens)
+            duration_ms = max(1, round((time.perf_counter() - started) * 1000))
+            cost_usd = estimate_cost(
+                prompt_tokens=response.prompt_tokens,
+                completion_tokens=response.completion_tokens,
+                model_name="gpt-4o-mini",
+            )
+            spans.append(
+                Span(
+                    len(spans) + 1,
+                    "llm",
+                    "llm_turn",
+                    list(messages),
+                    response.content,
+                    start_time_ms=0,
+                    end_time_ms=duration_ms,
+                    prompt_tokens=response.prompt_tokens,
+                    completion_tokens=response.completion_tokens,
+                    cost_usd=cost_usd,
+                )
+            )
             if not response.tool_calls:
                 answer = response.content
                 break
@@ -114,14 +149,20 @@ def run_openai_task(*, task: Task, client: ChatClient, tracer: Any | None = None
                     if error:
                         tool_span.set_attribute("error.type", error)
                 spans.append(Span(len(spans) + 1, "tool", call.name, call.arguments, output, error))
-                messages.append({"role": "tool", "tool_call_id": call.call_id, "content": json.dumps(output if error is None else {"error": error})})
+                messages.append({"role": "tool", "tool_call_id": call.call_id, "name": call.name, "content": json.dumps(output if error is None else {"error": error})})
         else:
             raise RuntimeError(f"Agent exceeded the {max_turns}-turn limit for {task.task_id}.")
         if not answer:
             raise RuntimeError(f"Agent did not return a final answer for {task.task_id}.")
         root_span.set_attribute("output.value", answer)
     spans.append(Span(len(spans) + 1, "final", "final_answer", None, answer))
-    return {"task_id": task.task_id, "answer": answer, "spans": [span.to_dict() for span in spans]}
+    serialized_spans = [span.to_dict() for span in spans]
+    return {
+        "task_id": task.task_id,
+        "answer": answer,
+        "spans": serialized_spans,
+        "metrics": aggregate_run_metrics(serialized_spans),
+    }
 
 
 def main() -> None:
@@ -134,8 +175,17 @@ def main() -> None:
     parser.add_argument("--output", type=Path)
     parser.add_argument("--trace", action="store_true", help="Export OpenInference spans to Phoenix via OTLP.")
     parser.add_argument("--endpoint", help="Phoenix OTLP endpoint or base URL")
+    parser.add_argument("--mock", action="store_true", help="Use the local deterministic OpenAI-compatible mock; no API key or network required.")
+    parser.add_argument("--mock-port", type=int, default=0, help="Mock server port; 0 selects an available local port.")
     args = parser.parse_args()
-    api_key = os.environ.get("OPENAI_API_KEY")
+    mock_server = None
+    if args.mock:
+        mock_server, _ = start_mock_server(port=args.mock_port)
+        api_key = "mock-key"
+        base_url = f"http://127.0.0.1:{mock_server.server_port}/v1"
+    else:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        base_url = args.base_url
     if not api_key:
         parser.error("OPENAI_API_KEY is required. No API call was made.")
     tasks = TASKS if args.all else tuple(task for task in TASKS if task.task_id == args.task_id)
@@ -145,15 +195,20 @@ def main() -> None:
     if args.trace:
         provider = configure_tracing(project_name="trajectiq-openai-compatible", endpoint=args.endpoint)
         tracer = provider.get_tracer("trajectiq.openai_compatible")
-    client = OpenAICompatibleClient(api_key=api_key, model=args.model, base_url=args.base_url)
-    runs = [run_openai_task(task=task, client=client, tracer=tracer, max_turns=args.max_turns) for task in tasks]
-    payload = {"version": f"openai-compatible:{args.model}", "runs": runs}
-    rendered = json.dumps(payload, ensure_ascii=False, indent=2)
-    if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(rendered + "\n", encoding="utf-8")
-    else:
-        print(rendered)
+    try:
+        client = OpenAICompatibleClient(api_key=api_key, model=args.model, base_url=base_url)
+        runs = [run_openai_task(task=task, client=client, tracer=tracer, max_turns=args.max_turns) for task in tasks]
+        payload = {"version": f"openai-compatible:{args.model}", "runs": runs}
+        rendered = json.dumps(payload, ensure_ascii=False, indent=2)
+        if args.output:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(rendered + "\n", encoding="utf-8")
+        else:
+            print(rendered)
+    finally:
+        if mock_server is not None:
+            mock_server.shutdown()
+            mock_server.server_close()
 
 
 if __name__ == "__main__":

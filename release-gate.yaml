@@ -4,3 +4,6 @@ thresholds:
   minimum_tool_selection_accuracy: 0.95
   maximum_critical_task_regressions: 0
   maximum_task_regressions: 0
+  maximum_average_latency_ms: 1000
+  maximum_average_total_tokens: 220
+  maximum_average_cost_usd: 0.001

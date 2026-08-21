@@ -9,6 +9,7 @@ from typing import Any
 from .agent import run_task
 from .data import TASKS
 from .models import AgentVersion, Task
+from .metrics import aggregate_run_metrics
 from .run import VERSIONS
 
 
@@ -34,6 +35,11 @@ class VersionMetrics:
     answer_coverage: float
     average_steps: float
     critical_task_success_rate: float
+    average_latency_ms: float
+    average_prompt_tokens: float
+    average_completion_tokens: float
+    average_total_tokens: float
+    average_cost_usd: float
 
 
 @dataclass(frozen=True)
@@ -59,7 +65,10 @@ class RegressionReport:
             "success_rate": self.candidate.success_rate - self.baseline.success_rate,
             "tool_selection_accuracy": self.candidate.tool_selection_accuracy - self.baseline.tool_selection_accuracy,
             "tool_argument_accuracy": self.candidate.tool_argument_accuracy - self.baseline.tool_argument_accuracy,
-            "answer_coverage": self.candidate.answer_coverage - self.baseline.answer_coverage,
+        "answer_coverage": self.candidate.answer_coverage - self.baseline.answer_coverage,
+            "average_latency_ms": self.candidate.average_latency_ms - self.baseline.average_latency_ms,
+            "average_total_tokens": self.candidate.average_total_tokens - self.baseline.average_total_tokens,
+            "average_cost_usd": self.candidate.average_cost_usd - self.baseline.average_cost_usd,
         }
         return payload
 
@@ -98,6 +107,7 @@ def evaluate_results(*, version_name: str, tasks: tuple[Task, ...], results_by_t
     evaluations = tuple(evaluate_task(task=task, result=result) for task, result in runs)
     task_count = len(evaluations)
     critical_evaluations = tuple(item for item in evaluations if item.is_critical)
+    run_metrics = tuple(aggregate_run_metrics(result["spans"]) for _, result in runs)
     metrics = VersionMetrics(
         version=version_name,
         task_count=task_count,
@@ -107,6 +117,11 @@ def evaluate_results(*, version_name: str, tasks: tuple[Task, ...], results_by_t
         answer_coverage=sum(item.has_expected_answer for item in evaluations) / task_count,
         average_steps=sum(len(_get_tool_spans(result)) for _, result in runs) / task_count,
         critical_task_success_rate=(sum(item.is_success for item in critical_evaluations) / len(critical_evaluations) if critical_evaluations else 1.0),
+        average_latency_ms=sum(item["duration_ms"] for item in run_metrics) / task_count,
+        average_prompt_tokens=sum(item["prompt_tokens"] for item in run_metrics) / task_count,
+        average_completion_tokens=sum(item["completion_tokens"] for item in run_metrics) / task_count,
+        average_total_tokens=sum(item["total_tokens"] for item in run_metrics) / task_count,
+        average_cost_usd=sum(item["cost_usd"] for item in run_metrics) / task_count,
     )
     return metrics, evaluations
 
@@ -174,9 +189,15 @@ def render_markdown(report: RegressionReport) -> str:
         ("Tool argument accuracy", report.baseline.tool_argument_accuracy, report.candidate.tool_argument_accuracy),
         ("Answer coverage", report.baseline.answer_coverage, report.candidate.answer_coverage),
         ("Critical task success rate", report.baseline.critical_task_success_rate, report.candidate.critical_task_success_rate),
+        ("Average latency (ms)", report.baseline.average_latency_ms, report.candidate.average_latency_ms),
+        ("Average total tokens", report.baseline.average_total_tokens, report.candidate.average_total_tokens),
+        ("Average cost (USD)", report.baseline.average_cost_usd, report.candidate.average_cost_usd),
     )
     lines = ["# TrajectIQ Regression Report", "", f"Baseline: {report.baseline.version}", f"Candidate: {report.candidate.version}", f"Dataset: {report.dataset}", "", "## Metrics", "", "| Metric | Baseline | Candidate | Delta |", "| --- | ---: | ---: | ---: |"]
-    lines.extend(f"| {label} | {format_percent(baseline_value)} | {format_percent(candidate_value)} | {format_percent(candidate_value - baseline_value)} |" for label, baseline_value, candidate_value in metric_rows)
+    lines.extend(
+        f"| {label} | {format_percent(baseline_value) if 'rate' in label.lower() else f'{baseline_value:.4f}'} | {format_percent(candidate_value) if 'rate' in label.lower() else f'{candidate_value:.4f}'} | {candidate_value - baseline_value:+.4f} |"
+        for label, baseline_value, candidate_value in metric_rows
+    )
     lines.extend(["", "## Regressions", ""])
     if not report.regressions:
         lines.append("No task regressions detected.")

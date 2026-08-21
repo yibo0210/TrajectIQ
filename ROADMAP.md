@@ -83,3 +83,12 @@ Acceptance: a raw OpenInference baseline/candidate export reproduces all ten det
 - Keep single-task default execution and explicit opt-in for full-dataset calls to control API cost.
 
 Acceptance: with an API key configured, one live task produces a standard TrajectIQ trajectory that can be evaluated or inspected in Phoenix.
+
+### v1.1: Production metrics and interview-ready demo (complete)
+
+- Add deterministic Span timing, token usage, and model-price-based cost estimates.
+- Add latency, token, and cost thresholds to the YAML release gate.
+- Display production metrics in the standalone Dashboard and regenerate demo artifacts.
+- Document a repeatable regression-to-fix demonstration and explicitly state current production boundaries.
+
+Acceptance: the fixed fixture passes quality and production-metric gates, the regression fixture is blocked, and a new user can complete the full demonstration from the README.

@@ -24,3 +24,12 @@ def test_regression_refund_task_selects_the_wrong_tool_reproducibly() -> None:
     assert [span["name"] for span in tool_spans] == ["estimate_delivery"]
     assert tool_spans[0]["input"] == {"order_id": "A1001"}
     assert result["answer"] == "Unable to process this request."
+
+
+def test_run_contains_reproducible_production_metrics() -> None:
+    result = run_task(version=VERSIONS["baseline"], task=_get_task("refund_001"))
+
+    assert result["metrics"]["duration_ms"] > 0
+    assert result["metrics"]["total_tokens"] == result["metrics"]["prompt_tokens"] + result["metrics"]["completion_tokens"]
+    assert result["metrics"]["cost_usd"] > 0
+    assert all("start_time_ms" in span and "cost_usd" in span for span in result["spans"])

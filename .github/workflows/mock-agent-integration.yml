@@ -1,0 +1,40 @@
+name: TrajectIQ mock Agent integration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mock-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install TrajectIQ
+        run: python -m pip install -e .[dev]
+      - name: Run mock OpenAI-compatible Agent
+        run: |
+          mkdir -p reports
+          trajectiq-openai-demo --mock --task-id refund_001 --output reports/mock-agent.json
+      - name: Validate mock trajectory
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path("reports/mock-agent.json").read_text())
+          run = payload["runs"][0]
+          tools = [span["name"] for span in run["spans"] if span["kind"] == "tool"]
+          assert tools == ["query_order", "search_policy"], tools
+          assert "3-5" in run["answer"], run["answer"]
+          print("Mock Agent integration passed:", " -> ".join(tools))
+          PY
+      - name: Upload mock trajectory
+        uses: actions/upload-artifact@v4
+        with:
+          name: trajectiq-mock-agent-trajectory
+          path: reports/mock-agent.json

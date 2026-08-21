@@ -6,11 +6,14 @@ type Scenario = "regression" | "fixed";
 type View = "overview" | "tasks" | "diagnosis";
 
 const metrics = [
-  ["任务成功率", "success_rate"],
-  ["工具选择准确率", "tool_selection_accuracy"],
-  ["工具参数准确率", "tool_argument_accuracy"],
-  ["回答覆盖率", "answer_coverage"],
-  ["关键任务成功率", "critical_task_success_rate"],
+  ["任务成功率", "success_rate", "percent"],
+  ["工具选择准确率", "tool_selection_accuracy", "percent"],
+  ["工具参数准确率", "tool_argument_accuracy", "percent"],
+  ["回答覆盖率", "answer_coverage", "percent"],
+  ["关键任务成功率", "critical_task_success_rate", "percent"],
+  ["平均延迟", "average_latency_ms", "ms"],
+  ["平均 Token", "average_total_tokens", "tokens"],
+  ["平均成本", "average_cost_usd", "usd"],
 ] as const;
 
 const categoryLabels: Record<string, string> = {
@@ -24,6 +27,13 @@ function formatPercent(value: number): string {
   return new Intl.NumberFormat("zh-CN", { style: "percent", maximumFractionDigits: 1 }).format(value);
 }
 
+function formatMetric(value: number, kind: "percent" | "ms" | "tokens" | "usd"): string {
+  if (kind === "percent") return formatPercent(value);
+  if (kind === "usd") return `$${value.toFixed(5)}`;
+  if (kind === "ms") return `${value.toFixed(1)} ms`;
+  return `${value.toFixed(1)}`;
+}
+
 function getDiagnosis(taskId: string, diagnoses: Diagnosis[]): Diagnosis | undefined {
   return diagnoses.find((diagnosis) => diagnosis.task_id === taskId);
 }
@@ -35,6 +45,9 @@ function formatViolation(rule: string): string {
     minimum_tool_selection_accuracy: "候选版本的工具选择准确率低于最低阈值。",
     maximum_critical_task_regressions: "候选版本的关键任务退化数量超过允许范围。",
     maximum_task_regressions: "候选版本的任务退化数量超过预警阈值。",
+    maximum_average_latency_ms: "候选版本的平均延迟超过阈值。",
+    maximum_average_total_tokens: "候选版本的平均 Token 用量超过阈值。",
+    maximum_average_cost_usd: "候选版本的平均估算成本超过阈值。",
   };
   return messages[rule] ?? "候选版本未满足发布质量规则。";
 }
@@ -129,7 +142,7 @@ export function App() {
     </nav>
     {activeView === "overview" && <section className="content-grid">
       <div className="section-heading"><div><p className="eyebrow">版本对比 / Version diff</p><h2>{report.baseline.version} <span>→</span> {report.candidate.version}</h2></div><span className="dataset">数据集：{report.dataset} · {report.baseline.task_count} 条任务</span></div>
-      <div className="metrics-grid">{metrics.map(([label, key]) => { const baseline = report.baseline[key]; const candidate = report.candidate[key]; const delta = candidate - baseline; return <article className="metric" key={key}><div className="metric-top"><p>{label}</p><span className={delta < 0 ? "delta negative" : "delta positive"}>{(delta >= 0 ? "+" : "") + formatPercent(delta)}</span></div><strong>{formatPercent(candidate)}</strong><div className="metric-meter" aria-label={`${label} ${formatPercent(candidate)}`}><span style={{ width: `${candidate * 100}%` }} /></div><small>基线 {formatPercent(baseline)}</small></article>; })}</div>
+      <div className="metrics-grid">{metrics.map(([label, key, kind]) => { const baseline = report.baseline[key]; const candidate = report.candidate[key]; const delta = candidate - baseline; const meterWidth = kind === "percent" ? candidate * 100 : Math.min(100, candidate > 0 ? 70 : 0); const deltaIsBad = kind === "percent" ? delta < 0 : delta > 0; return <article className="metric" key={key}><div className="metric-top"><p>{label}</p><span className={deltaIsBad ? "delta negative" : "delta positive"}>{(delta >= 0 ? "+" : "") + formatMetric(delta, kind)}</span></div><strong>{formatMetric(candidate, kind)}</strong><div className="metric-meter" aria-label={`${label} ${formatMetric(candidate, kind)}`}><span style={{ width: `${meterWidth}%` }} /></div><small>基线 {formatMetric(baseline, kind)}</small></article>; })}</div>
       <article className="finding-panel"><div><p className="eyebrow">门禁结论</p><h3>{status === "PASS" ? "未发现发布阻塞项" : "当前版本的阻塞原因"}</h3></div>{status === "PASS" ? <p>任务质量与关键任务检查均达到发布要求。</p> : <ul>{payload.gate.violations.map((violation) => <li key={violation.rule}>{formatViolation(violation.rule)}</li>)}</ul>}</article>
     </section>}
     {activeView === "tasks" && <section className="content-grid"><div className="section-heading"><div><p className="eyebrow">任务级退化</p><h2>{report.regressions.length} 条受影响任务</h2></div></div>{report.regressions.length === 0 ? <div className="empty-state">当前候选版本未发现任务退化。</div> : <div className="task-list">{report.regressions.map((task) => <button className={selectedTaskId === task.task_id ? "task-row selected" : "task-row"} key={task.task_id} onClick={() => { setSelectedTaskId(task.task_id); setActiveView("diagnosis"); }}><span className={task.is_critical ? "priority critical" : "priority"}>{task.is_critical ? "关键任务" : "常规任务"}</span><strong>{task.task_id}</strong><span>预期：{task.expected_tools.join(" -> ")}</span><span>实际：{task.actual_tools.join(" -> ")}</span></button>)}</div>}</section>}

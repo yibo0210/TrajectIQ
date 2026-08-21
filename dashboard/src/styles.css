@@ -56,7 +56,7 @@ h1 { color: #16221e; font-size: 18px; letter-spacing: .02em; }
 .section-heading h2 span { color: #159b7d; }
 .dataset { color: #778680; font-family: "SFMono-Regular", Consolas, monospace; font-size: 11px; }
 
-.metrics-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+.metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .metric { min-height: 154px; padding: 16px; border: 1px solid #dce4e1; background: #fff; box-shadow: 0 2px 4px #273a3305; transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease; }
 .metric:hover { border-color: #a9c8be; box-shadow: 0 10px 20px #2341360d; transform: translateY(-2px); }
 .metric-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }

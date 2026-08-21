@@ -15,6 +15,11 @@ export type Report = {
     tool_argument_accuracy: number;
     answer_coverage: number;
     critical_task_success_rate: number;
+    average_latency_ms: number;
+    average_prompt_tokens: number;
+    average_completion_tokens: number;
+    average_total_tokens: number;
+    average_cost_usd: number;
   };
   candidate: {
     version: string;
@@ -24,6 +29,11 @@ export type Report = {
     tool_argument_accuracy: number;
     answer_coverage: number;
     critical_task_success_rate: number;
+    average_latency_ms: number;
+    average_prompt_tokens: number;
+    average_completion_tokens: number;
+    average_total_tokens: number;
+    average_cost_usd: number;
   };
   regressions: RegressionTask[];
 };

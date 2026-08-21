@@ -50,6 +50,19 @@ def _span_start(span: dict[str, Any], index: int) -> tuple[int, int]:
         return 0, index
 
 
+def _span_timing(span: dict[str, Any]) -> tuple[int, int]:
+    start = _span_start(span, 0)[0]
+    end_value = span.get("end_time") or span.get("end_time_unix_nano") or span.get("endTimeUnixNano") or start
+    try:
+        end = int(end_value)
+    except (TypeError, ValueError):
+        end = start
+    # OTLP timestamps are nanoseconds; normalized fixtures may already use ms.
+    if start > 10_000_000_000:
+        return start // 1_000_000, end // 1_000_000
+    return start, end
+
+
 def load_openinference_export(path: Path) -> tuple[str, dict[str, dict[str, Any]]]:
     """Load a Phoenix/OpenTelemetry JSON export into normalized TrajectIQ runs.
 
@@ -113,6 +126,12 @@ def load_openinference_export(path: Path) -> tuple[str, dict[str, dict[str, Any]
                     "input": _parse_value(attrs.get("input.value")),
                     "output": output,
                     "error": error,
+                    "start_time_ms": _span_timing(span)[0],
+                    "end_time_ms": _span_timing(span)[1],
+                    "duration_ms": max(0, _span_timing(span)[1] - _span_timing(span)[0]),
+                    "prompt_tokens": int(attrs.get("llm.token_count.prompt", 0) or 0),
+                    "completion_tokens": int(attrs.get("llm.token_count.completion", 0) or 0),
+                    "cost_usd": float(attrs.get("llm.cost.total", 0.0) or 0.0),
                 }
             )
         if not answer:

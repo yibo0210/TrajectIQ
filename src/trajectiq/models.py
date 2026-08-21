@@ -8,6 +8,7 @@ class AgentVersion:
     prompt_revision: str
     tool_policy: str
     max_steps: int = 6
+    model_name: str = "gpt-4o-mini"
 
 
 @dataclass(frozen=True)
@@ -30,6 +31,11 @@ class Span:
     input: Any
     output: Any
     error: str | None = None
+    start_time_ms: int = 0
+    end_time_ms: int = 0
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+    cost_usd: float = 0.0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

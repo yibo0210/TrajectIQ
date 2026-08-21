@@ -38,6 +38,8 @@ def _normalize_run(run: object, *, source: Path) -> tuple[str, dict[str, Any]]:
     for index, span in enumerate(spans):
         if not isinstance(span, dict) or not isinstance(span.get("name"), str):
             raise ValueError(f"Run {task_id} span {index} in {source} must contain a name.")
+        start_time_ms = span.get("start_time_ms", 0)
+        end_time_ms = span.get("end_time_ms", start_time_ms)
         normalized_spans.append(
             {
                 "step": span.get("step", index + 1),
@@ -46,9 +48,16 @@ def _normalize_run(run: object, *, source: Path) -> tuple[str, dict[str, Any]]:
                 "input": span.get("input"),
                 "output": span.get("output"),
                 "error": span.get("error"),
+                "start_time_ms": span.get("start_time_ms", 0),
+                "end_time_ms": span.get("end_time_ms", span.get("start_time_ms", 0)),
+                "duration_ms": span.get("duration_ms", max(0, end_time_ms - start_time_ms)),
+                "prompt_tokens": span.get("prompt_tokens", 0),
+                "completion_tokens": span.get("completion_tokens", 0),
+                "cost_usd": span.get("cost_usd", 0.0),
             }
         )
-    return task_id, {"task_id": task_id, "answer": answer, "spans": normalized_spans}
+    metrics = run.get("metrics")
+    return task_id, {"task_id": task_id, "answer": answer, "spans": normalized_spans, "metrics": metrics or {}}
 
 
 def load_trace_collection(path: Path) -> TraceCollection:
